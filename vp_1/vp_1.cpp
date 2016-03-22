@@ -13,6 +13,7 @@ template<typename T>void print(T ** A, int n, bool toFile, bool withZero){
 	int start;
 	if (withZero) start = 0; else start = 1;
 	if (!toFile) {
+		//Hello. Buin
 		for (int i = start; i < n; i++) {
 			for (int j = start; j < n; j++)
 				cout << A[j][i] - A[i][j] << " ";
