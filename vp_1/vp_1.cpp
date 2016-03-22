@@ -13,10 +13,9 @@ template<typename T>void print(T ** A, int n, bool toFile, bool withZero){
 	int start;
 	if (withZero) start = 0; else start = 1;
 	if (!toFile) {
-		//Hello. Buin
 		for (int i = start; i < n; i++) {
 			for (int j = start; j < n; j++)
-				cout << A[j][i] - A[i][j] << " ";
+				cout << A[i][j] << " ";
 			cout << endl;
 		}
 	}
@@ -55,8 +54,8 @@ void fillA(double ** A, int ** Ind, int k, int n, double h, double * F, double s
 				A[Ind[i][j]][Ind[i][j]] = 2 * (a + b) / h;
 				if (Ind[i - 1][j] > 0) A[Ind[i][j]][Ind[i - 1][j]] = -a / h; else F[i] += (a / h) * fi(step*(i - 1), step*j);
 				if (Ind[i + 1][j] > 0) A[Ind[i][j]][Ind[i + 1][j]] = -a / h; else F[i] += (a / h) * fi(step*(i + 1), step*j);
-				if (Ind[i][j - 1] > 0) A[Ind[i][j]][Ind[i][j - 1]] = -b / h; else F[i] += (a / h) * fi(step*i, step*(j - 1));//fix coefficents
-				if (Ind[i][j + 1] > 0) A[Ind[i][j]][Ind[i][j + 1]] = -b / h; else F[i] += (a / h) * fi(step*i, step*(j + 1));
+				if (Ind[i][j - 1] > 0) A[Ind[i][j]][Ind[i][j - 1]] = -b / h; else F[i] += (b / h) * fi(step*i, step*(j - 1));
+				if (Ind[i][j + 1] > 0) A[Ind[i][j]][Ind[i][j + 1]] = -b / h; else F[i] += (b / h) * fi(step*i, step*(j + 1));
 
 			}
 		}
