@@ -9,6 +9,9 @@ using namespace std;
 const double a = 0.9;
 const double b = 1.1;
 const double epsilon = 0.01;
+bool isBorder(int i, int j, int N) {   // if knot of grid is on border of my area
+	if (i == 0 || j == 0 || j == N || (j <= N / 2 && i + j == N) || (j > N / 2 && i == j)) return true; else return false;
+}
 double f(double x, double y) {
 	return (4 - 3.2 * x * x - 4.8 * y * y) / ((1 + x * x + y * y)*(1 + x * x + y * y)*(1 + x * x + y * y));
 }
@@ -29,7 +32,7 @@ void print(double * F, int n) {
 	}
 	cout << endl;
 }
-double normOfDiff (double * x1, double * x2, int n) {
+double normOfDiff (double * x1, double * x2, int n) { //norm of x1-x2 vectors
 	double norm = 0;
 	for (int i = 1; i < n + 1; i++) {
 		norm += abs(x1[i] - x2[i]);
@@ -78,17 +81,28 @@ double fi(double x, double y) {
 	return 1 / (1 + x*x + y*y);
 
 }
-bool isBorder(int i, int j, int N) {
-	if (i == 0 || j == 0 || j == N || (j <= N / 2 && i + j == N) || (j > N / 2 && i == j)) return true; else return false;
+void solutionToMatrix(double ** A, int ** Ind, double ** Result, double ** PreciseSolution ,double * x, double N, double step) {
+	for (int i = 1; i < N + 1; i++) {
+		for (int j = 1; j < N + 1; j++) {
+			if (Ind[i][j] > 0) {
+				PreciseSolution[i][j] = fi(step * i, step * j);
+				Result[i][j] = x[Ind[i][j]];
+			}
+			else if (isBorder(i, j, N)) {
+				Result[i][j] = fi(step * i, step * j);
+				PreciseSolution[i][j] = fi(step * i, step * j);
+			}
+		}
+	}
 }
+
 void fillMatrix(double ** A, int ** Ind, int k, int n, double h, double * F, double step) {
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
 			if (Ind[i][j] > 0) {
 				A[Ind[i][j]][Ind[i][j]] = 2 * (a + b) / h;
 				F[Ind[i][j]] += f(step * i, step * j);
-				//F[Ind[i][j]] = Ind[i][j];
-				if (Ind[i - 1][j] > 0) A[Ind[i][j]][Ind[i - 1][j]] = -a / h; else F[Ind[i][j]] += (a / h) * fi(step*(i - 1), step*j); // TODO add f(x,y) value
+				if (Ind[i - 1][j] > 0) A[Ind[i][j]][Ind[i - 1][j]] = -a / h; else F[Ind[i][j]] += (a / h) * fi(step*(i - 1), step*j);
 				if (Ind[i + 1][j] > 0) A[Ind[i][j]][Ind[i + 1][j]] = -a / h; else F[Ind[i][j]] += (a / h) * fi(step*(i + 1), step*j);
 				if (Ind[i][j - 1] > 0) A[Ind[i][j]][Ind[i][j - 1]] = -b / h; else F[Ind[i][j]] += (b / h) * fi(step*i, step*(j - 1));
 				if (Ind[i][j + 1] > 0) A[Ind[i][j]][Ind[i][j + 1]] = -b / h; else F[Ind[i][j]] += (b / h) * fi(step*i, step*(j + 1));
@@ -113,10 +127,20 @@ int main()
 		U[i] = (double*)calloc(sizeof(double), N + 1);
 	
 	int **Ind;
-	double **A;
+	double **A, **Result, **PreciseSolution;
+
 	Ind = (int**)calloc(sizeof(int*), N + 1);
 	for (int i = 0; i <= N; i++)
 		Ind[i] = (int*)calloc(sizeof(int), N + 1);
+
+	Result = (double**)calloc(sizeof(double*), N + 1);
+	for (int i = 0; i <= N; i++)
+		Result[i] = (double*)calloc(sizeof(double), N + 1);
+
+	PreciseSolution = (double**)calloc(sizeof(double*), N + 1);
+	for (int i = 0; i <= N; i++)
+		PreciseSolution[i] = (double*)calloc(sizeof(double), N + 1);
+
 	setZero(Ind, N + 1);
 	k = fillIndexes(Ind, N);
 	print(Ind, N + 1, false, true);
@@ -130,11 +154,12 @@ int main()
 		A[i] = (double*)calloc(sizeof(double), k + 1);
 	fillMatrix(A, Ind, k, N, h, F, step);
 	Solve(A, F, x, xNext, k);
-	print(x, k);
-	//print(F, k);
-	cout << fi(step * 2, step * 2) << endl;
-	//print(A, k + 1, false, false);
-	//cout << (normOfDiff(x, xNext, k)) << endl;
+	solutionToMatrix(A, Ind, Result, PreciseSolution, x, N, step);
+	//print(x, k);
+	print(Result, N, false, false);
+	cout << endl;
+	print(PreciseSolution, N, false, false);
+
 	_getch();
 	return 0;
 }
