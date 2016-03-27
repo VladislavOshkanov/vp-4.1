@@ -9,7 +9,9 @@ using namespace std;
 const double a = 0.9;
 const double b = 1.1;
 const double epsilon = 0.01;
-
+double f(double x, double y) {
+	return (4 - 3.2 * x * x - 4.8 * y * y) / ((1 + x * x + y * y)*(1 + x * x + y * y)*(1 + x * x + y * y));
+}
 template<typename T>void print(T ** A, int n, bool toFile, bool withZero){
 	int start;
 	if (withZero) start = 0; else start = 1;
@@ -23,7 +25,7 @@ template<typename T>void print(T ** A, int n, bool toFile, bool withZero){
 }
 void print(double * F, int n) {
 	for (int i = 0; i < n; i++) {
-		cout << F[n] << " ";
+		cout << F[i] << " ";
 	}
 	cout << endl;
 }
@@ -80,17 +82,20 @@ bool isBorder(int i, int j, int N) {
 	if (i == 0 || j == 0 || j == N || (j <= N / 2 && i + j == N) || (j > N / 2 && i == j)) return true; else return false;
 }
 void fillMatrix(double ** A, int ** Ind, int k, int n, double h, double * F, double step) {
-	for (int i = 0; i < n; i++)
-		for (int j = 0; j < n; j++){
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
 			if (Ind[i][j] > 0) {
 				A[Ind[i][j]][Ind[i][j]] = 2 * (a + b) / h;
-				if (Ind[i - 1][j] > 0) A[Ind[i][j]][Ind[i - 1][j]] = -a / h; else F[i] += (a / h) * fi(step*(i - 1), step*j);// TODO add f(x,y) value
-				if (Ind[i + 1][j] > 0) A[Ind[i][j]][Ind[i + 1][j]] = -a / h; else F[i] += (a / h) * fi(step*(i + 1), step*j);
-				if (Ind[i][j - 1] > 0) A[Ind[i][j]][Ind[i][j - 1]] = -b / h; else F[i] += (b / h) * fi(step*i, step*(j - 1));
-				if (Ind[i][j + 1] > 0) A[Ind[i][j]][Ind[i][j + 1]] = -b / h; else F[i] += (b / h) * fi(step*i, step*(j + 1));
+				F[Ind[i][j]] += f(step * i, step * j);
+				//F[Ind[i][j]] = Ind[i][j];
+				if (Ind[i - 1][j] > 0) A[Ind[i][j]][Ind[i - 1][j]] = -a / h; else F[Ind[i][j]] += (a / h) * fi(step*(i - 1), step*j); // TODO add f(x,y) value
+				if (Ind[i + 1][j] > 0) A[Ind[i][j]][Ind[i + 1][j]] = -a / h; else F[Ind[i][j]] += (a / h) * fi(step*(i + 1), step*j);
+				if (Ind[i][j - 1] > 0) A[Ind[i][j]][Ind[i][j - 1]] = -b / h; else F[Ind[i][j]] += (b / h) * fi(step*i, step*(j - 1));
+				if (Ind[i][j + 1] > 0) A[Ind[i][j]][Ind[i][j + 1]] = -b / h; else F[Ind[i][j]] += (b / h) * fi(step*i, step*(j + 1));
 
 			}
 		}
+	}
 }
 
 
@@ -126,6 +131,8 @@ int main()
 	fillMatrix(A, Ind, k, N, h, F, step);
 	Solve(A, F, x, xNext, k);
 	print(x, k);
+	//print(F, k);
+	cout << fi(step * 2, step * 2) << endl;
 	//print(A, k + 1, false, false);
 	//cout << (normOfDiff(x, xNext, k)) << endl;
 	_getch();
