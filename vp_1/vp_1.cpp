@@ -39,7 +39,7 @@ double normOfDiff (double * x1, double * x2, int n) { //norm of x1-x2 vectors
 	}
 	return norm;
 }
-void copy(double * from, double * to, int n) {
+void copy(double * from, double * to, int n) { // copies one vector to another
 	for (int i = 1; i < n + 1; i++) {
 		to[i] = from[i];
 	}
@@ -56,11 +56,6 @@ void Solve(double ** A, double * F, double * x, double * xNext, int N) {
 			xNext[i] = (1 / A[i][i])*(F[i] - sum);
 		}
 	}
-}
-template<typename T> void setZero(T ** A, int n) {
-	for (int i = 0; i < n; i++)
-		for (int j = 0; j < n; j++)
-			A[i][j] = 0;
 }
 int fillIndexes(int ** Ind, int N) {
 	int k = 0;
@@ -81,7 +76,8 @@ double fi(double x, double y) {
 	return 1 / (1 + x*x + y*y);
 
 }
-void solutionToMatrix(double ** A, int ** Ind, double ** Result, double ** PreciseSolution ,double * x, double N, double step) {
+void solutionToMatrix(double ** A, int ** Ind, double ** Result, double ** PreciseSolution ,double * x, double N, double step) { 
+	/*fliis matrices Result and Precise solution with approximate solution and precise solution*/
 	for (int i = 1; i < N + 1; i++) {
 		for (int j = 1; j < N + 1; j++) {
 			if (Ind[i][j] > 0) {
@@ -96,7 +92,7 @@ void solutionToMatrix(double ** A, int ** Ind, double ** Result, double ** Preci
 	}
 }
 
-void fillMatrix(double ** A, int ** Ind, int k, int n, double h, double * F, double step) {
+void fillMatrix(double ** A, int ** Ind, int k, int n, double h, double * F, double step) { // Fills A matrix and F vector
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
 			if (Ind[i][j] > 0) {
@@ -141,7 +137,6 @@ int main()
 	for (int i = 0; i <= N; i++)
 		PreciseSolution[i] = (double*)calloc(sizeof(double), N + 1);
 
-	setZero(Ind, N + 1);
 	k = fillIndexes(Ind, N);
 	print(Ind, N + 1, false, true);
 	cout << k << endl;
