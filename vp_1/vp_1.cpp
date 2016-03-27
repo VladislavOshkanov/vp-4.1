@@ -8,8 +8,8 @@
 using namespace std;
 const double a = 0.9;
 const double b = 1.1;
-const double epsilon = 0.01;
-bool isBorder(int i, int j, int N) {   // if knot of grid is on border of my area
+const double epsilon = 0.1;
+bool isBorder(int i, int j, int N) {   // if knot of net is on border of my area
 	if (i == 0 || j == 0 || j == N || (j <= N / 2 && i + j == N) || (j > N / 2 && i == j)) return true; else return false;
 }
 double f(double x, double y) {
@@ -125,7 +125,7 @@ int main()
 	int **Ind;
 	double **A, **Result, **PreciseSolution;
 
-	Ind = (int**)calloc(sizeof(int*), N + 1);
+	Ind = (int**)calloc(sizeof(int*), N + 1); // this matrix set corespondence between our net and z vector
 	for (int i = 0; i <= N; i++)
 		Ind[i] = (int*)calloc(sizeof(int), N + 1);
 
@@ -138,7 +138,7 @@ int main()
 		PreciseSolution[i] = (double*)calloc(sizeof(double), N + 1);
 
 	k = fillIndexes(Ind, N);
-	print(Ind, N + 1, false, true);
+	//print(Ind, N + 1, false, true);
 	cout << k << endl;
 	F = (double *)calloc(sizeof(double), k + 1);
 	x = (double *)calloc(sizeof(double), k + 1);
@@ -151,10 +151,14 @@ int main()
 	Solve(A, F, x, xNext, k);
 	solutionToMatrix(A, Ind, Result, PreciseSolution, x, N, step);
 	//print(x, k);
-	print(Result, N, false, false);
+	/*print(Result, N, false, false);
 	cout << endl;
-	print(PreciseSolution, N, false, false);
-
+	print(PreciseSolution, N, false, false);*/
+	double max = 0;
+	for (int i = 1; i < N + 1; i++)
+		for (int j = 1; j < N + 1; j++)
+			if (fabs(Result[i][j] - PreciseSolution[i][j]) > max) max = fabs(Result[i][j] - PreciseSolution[i][j]);
+	cout << max;
 	_getch();
 	return 0;
 }
