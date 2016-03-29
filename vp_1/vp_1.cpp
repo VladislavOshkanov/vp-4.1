@@ -5,26 +5,29 @@
 #include <iostream>
 #include <fstream>
 #include<conio.h>
+#include<string>
 using namespace std;
 const double a = 0.9;
 const double b = 1.1;
-const double epsilon = 0.1;
+const double epsilon = 0.01;
 bool isBorder(int i, int j, int N) {   // if knot of net is on border of my area
 	if (i == 0 || j == 0 || j == N || (j <= N / 2 && i + j == N) || (j > N / 2 && i == j)) return true; else return false;
 }
 double f(double x, double y) {
 	return (4 - 3.2 * x * x - 4.8 * y * y) / ((1 + x * x + y * y)*(1 + x * x + y * y)*(1 + x * x + y * y));
 }
-template<typename T>void print(T ** A, int n, bool toFile, bool withZero){
-	int start;
-	if (withZero) start = 0; else start = 1;
-	if (!toFile) {
-		for (int i = start; i < n; i++) {
-			for (int j = start; j < n; j++)
-				cout << A[i][j] << " ";
-			cout << endl;
+template<typename T>void print(T ** A, int n, bool toFile, bool withZero, string filename, double step){
+	if (toFile) {
+		ofstream fout;
+		fout.open(filename);
+		for (int i = 0; i < n + 1; i++) {
+			for (int j = 0; j < n; j++) {
+				fout  << step * i << " " << step * j << " " << A[i][j] << endl;
+			}
+			fout << endl;
 		}
 	}
+	
 }
 void print(double * F, int n) {
 	for (int i = 0; i < n; i++) {
@@ -44,7 +47,7 @@ void copy(double * from, double * to, int n) { // copies one vector to another
 		to[i] = from[i];
 	}
 }
-void Solve(double ** A, double * F, double * x, double * xNext, int N) {
+void Solve(double ** A, double * F, double * x, double * xNext, int N) { //solving matrix using Jacobi algorithm
 	double sum = 0;
 	while (normOfDiff(x, xNext, N) > epsilon) {
 		copy(xNext, x, N);
@@ -116,7 +119,7 @@ int main()
 	cin >> N;
 	double step = 1.0 / N;
 	double h = step * step; 
-	double **U;
+	double **U, **Err;
 	double *F, *x, *xNext;
 	U = (double**)calloc(sizeof(double*), N + 1);
 	for (int i = 0; i <= N; i++)
@@ -137,6 +140,10 @@ int main()
 	for (int i = 0; i <= N; i++)
 		PreciseSolution[i] = (double*)calloc(sizeof(double), N + 1);
 
+	Err = (double**)calloc(sizeof(double*), N + 1);
+	for (int i = 0; i <= N; i++)
+		Err [i] = (double*)calloc(sizeof(double), N + 1);
+
 	k = fillIndexes(Ind, N);
 	//print(Ind, N + 1, false, true);
 	cout << k << endl;
@@ -154,11 +161,17 @@ int main()
 	/*print(Result, N, false, false);
 	cout << endl;
 	print(PreciseSolution, N, false, false);*/
+
 	double max = 0;
 	for (int i = 1; i < N + 1; i++)
 		for (int j = 1; j < N + 1; j++)
+		{
 			if (fabs(Result[i][j] - PreciseSolution[i][j]) > max) max = fabs(Result[i][j] - PreciseSolution[i][j]);
+			Err[i][j] = fabs ( Result[i][j] - PreciseSolution[i][j] );
+		}
 	cout << max;
+	print(Err, N, true, false, "output.txt", step);
+
 	_getch();
 	return 0;
 }
