@@ -2,64 +2,27 @@
 //
 
 #include "stdafx.h"
+#include "Service.h"
+#include "Jacobi.h"
 #include <iostream>
 #include <fstream>
 #include<conio.h>
-#include<string>
+
 using namespace std;
 const double a = 0.9;
 const double b = 1.1;
-const double epsilon = 0.01;
+
 bool isBorder(int i, int j, int N) {   // if knot of net is on border of my area
 	if (i == 0 || j == 0 || j == N || (j <= N / 2 && i + j == N) || (j > N / 2 && i == j)) return true; else return false;
 }
+
 double f(double x, double y) {
 	return (4 - 3.2 * x * x - 4.8 * y * y) / ((1 + x * x + y * y)*(1 + x * x + y * y)*(1 + x * x + y * y));
 }
-template<typename T>void print(T ** A, int n, bool toFile, bool withZero, string filename, double step){
-	if (toFile) {
-		ofstream fout;
-		fout.open(filename);
-		for (int i = 0; i < n + 1; i++) {
-			for (int j = 0; j < n; j++) {
-				fout  << step * i << " " << step * j << " " << A[i][j] << endl;
-			}
-			fout << endl;
-		}
-	}
-	
-}
-void print(double * F, int n) {
-	for (int i = 0; i < n; i++) {
-		cout << F[i] << " ";
-	}
-	cout << endl;
-}
-double normOfDiff (double * x1, double * x2, int n) { //norm of x1-x2 vectors
-	double norm = 0;
-	for (int i = 1; i < n + 1; i++) {
-		norm += abs(x1[i] - x2[i]);
-	}
-	return norm;
-}
-void copy(double * from, double * to, int n) { // copies one vector to another
-	for (int i = 1; i < n + 1; i++) {
-		to[i] = from[i];
-	}
-}
-void Solve(double ** A, double * F, double * x, double * xNext, int N) { //solving matrix using Jacobi algorithm
-	double sum = 0;
-	while (normOfDiff(x, xNext, N) > epsilon) {
-		copy(xNext, x, N);
-		for (int i = 1; i < N + 1; i++) {
-			sum = 0;
-			for (int j = 1; j < N + 1; j++) {
-				if (i != j) sum += A[i][j] * x[j];
-			}
-			xNext[i] = (1 / A[i][i])*(F[i] - sum);
-		}
-	}
-}
+
+
+
+
 int fillIndexes(int ** Ind, int N) {
 	int k = 0;
 	for (int i = 0; i <= N; i++)
@@ -79,7 +42,7 @@ double fi(double x, double y) {
 	return 1 / (1 + x*x + y*y);
 
 }
-void solutionToMatrix(double ** A, int ** Ind, double ** Result, double ** PreciseSolution ,double * x, double N, double step) { 
+void solutionToMatrix(int ** Ind, double ** Result, double ** PreciseSolution ,double * x, int N, double step) { 
 	/*fliis matrices Result and Precise solution with approximate solution and precise solution*/
 	for (int i = 1; i < N + 1; i++) {
 		for (int j = 1; j < N + 1; j++) {
@@ -95,7 +58,7 @@ void solutionToMatrix(double ** A, int ** Ind, double ** Result, double ** Preci
 	}
 }
 
-void fillMatrix(double ** A, int ** Ind, int k, int n, double h, double * F, double step) { // Fills A matrix and F vector
+void fillMatrix(double ** A, int ** Ind, int n, double h, double * F, double step) { // Fills A matrix and F vector
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
 			if (Ind[i][j] > 0) {
@@ -109,6 +72,13 @@ void fillMatrix(double ** A, int ** Ind, int k, int n, double h, double * F, dou
 			}
 		}
 	}
+}
+template<typename T> T ** allocateMemory(int N) {
+	T ** A;
+	A = (T**)calloc(sizeof(T*), N);
+	for (int i = 0; i <= N; i++)
+		 A[i] = (T*)calloc(sizeof(T), N);
+	return A;
 }
 
 
@@ -128,50 +98,30 @@ int main()
 	int **Ind;
 	double **A, **Result, **PreciseSolution;
 
-	Ind = (int**)calloc(sizeof(int*), N + 1); // this matrix set corespondence between our net and z vector
-	for (int i = 0; i <= N; i++)
-		Ind[i] = (int*)calloc(sizeof(int), N + 1);
-
-	Result = (double**)calloc(sizeof(double*), N + 1);
-	for (int i = 0; i <= N; i++)
-		Result[i] = (double*)calloc(sizeof(double), N + 1);
-
-	PreciseSolution = (double**)calloc(sizeof(double*), N + 1);
-	for (int i = 0; i <= N; i++)
-		PreciseSolution[i] = (double*)calloc(sizeof(double), N + 1);
-
-	Err = (double**)calloc(sizeof(double*), N + 1);
-	for (int i = 0; i <= N; i++)
-		Err [i] = (double*)calloc(sizeof(double), N + 1);
+	Ind = allocateMemory<int>(N + 1);
+	Result = allocateMemory<double>(N+1);
+	PreciseSolution = allocateMemory<double>(N + 1);
+	Err = allocateMemory<double>(N + 1);
 
 	k = fillIndexes(Ind, N);
-	//print(Ind, N + 1, false, true);
+
 	cout << k << endl;
 	F = (double *)calloc(sizeof(double), k + 1);
 	x = (double *)calloc(sizeof(double), k + 1);
 	xNext = (double *)calloc(sizeof(double), k + 1);
 	x[1] = 1;
-	A = (double**)calloc(sizeof(double*), k + 1);
-	for (int i = 0; i <= k + 1; i++)
-		A[i] = (double*)calloc(sizeof(double), k + 1);
-	fillMatrix(A, Ind, k, N, h, F, step);
+	A = allocateMemory<double>(k + 1); 
+	
+
+	fillMatrix(A, Ind,N, h, F, step);
 	Solve(A, F, x, xNext, k);
-	solutionToMatrix(A, Ind, Result, PreciseSolution, x, N, step);
-	//print(x, k);
-	/*print(Result, N, false, false);
-	cout << endl;
-	print(PreciseSolution, N, false, false);*/
+	solutionToMatrix(Ind, Result, PreciseSolution, x, N, step);
+	
 
-	double max = 0;
-	for (int i = 1; i < N + 1; i++)
-		for (int j = 1; j < N + 1; j++)
-		{
-			if (fabs(Result[i][j] - PreciseSolution[i][j]) > max) max = fabs(Result[i][j] - PreciseSolution[i][j]);
-			Err[i][j] = fabs ( Result[i][j] - PreciseSolution[i][j] );
-		}
+	double max = normOfDiff(Result, PreciseSolution, Err, N);
 	cout << max;
-	print(Err, N, true, false, "output.txt", step);
 
+	print(Err, N, true, false, step);
 	_getch();
 	return 0;
 }
