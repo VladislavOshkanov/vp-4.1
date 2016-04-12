@@ -11,7 +11,7 @@ struct Eigenvalues {
 void print(double * F, int n);
 
 
-template <typename T> void print(T ** A, int n, bool toFile, bool withZero, double step) {
+template <typename T> void print(T ** A, int n, bool toFile, double step) {
 	if (toFile) {
 		ofstream fout;
 		fout.open("C:\\VP\\output.txt");
@@ -41,6 +41,7 @@ template<typename T> T ** allocateMemory(int N) {
 	return A;
 }
 void copy(double * from, double * to, int n);
+void copy(double ** from, double ** to, int n);
 
 double normOfDiff(double * x1, double * x2, int n);
 

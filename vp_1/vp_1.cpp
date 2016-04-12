@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "Service.h"
 #include "Jacobi.h"
+#include "Lusternik.h" 
 #include <iostream>
 #include <fstream>
 #include<conio.h>
@@ -90,43 +91,18 @@ int main()
 		U[i] = (double*)calloc(sizeof(double), N + 1);
 	
 	int **Ind;
-	double **A, **Result, **PreciseSolution, **K, **L, **M;
+	double **A, **Result, **PreciseSolution;
 
 	Ind = allocateMemory<int>(N + 1);
 	Result = allocateMemory<double>(N+1);
 	PreciseSolution = allocateMemory<double>(N + 1);
 	Err = allocateMemory<double>(N + 1);
-	K = allocateMemory<double>(N + 1);
-	L = allocateMemory<double>(N + 1);
-	M = allocateMemory<double>(N + 1);
-	double * y, * result;
-	y = (double *)calloc(sizeof(double), 4);
-	result = (double *)calloc(sizeof(double), 4);
-	srand(time(NULL));
-	for (int i = 1; i < 4; i++)
-		for (int j = 1; j < 4; j++) {
-			K[i][j] = rand() % 10 - 5;
-			M[i][j] = K[i][j];
-			y[j] = rand() % 10 - 5;
-		}
-	print(M, 4, false, false, step);
-//	for (int i = 1; i < 4; i++) {
-//		K[i][i]--; M[i][i]--;
-//	}
-	
-	for (int i = 1; i < 40; i++) {
-		mul(K, M, L, 5);
-		for (int j = 1; j < 5; j++)
-			for (int l = 1;l < 5; l++)
-				K[j][l] = L[j][l];
-	}
-	mul(K, y, result, 4);
-	double n1 = norm(result, 4);
-	mul(K, M, L, 4);
-	mul(L, y, result, 4);
-	double n2 = norm(result, 4);
-	cout <<"Eigenvalue: "<< n2 / n1 << endl;
-
+	double ** B; 
+	B = allocateMemory<double>(N + 1);
+	srand((unsigned)time(NULL));
+	/*for (int i = 1; i < N + 1; i++)
+		for (int j = 1; j < N + 1; j++)
+			B[i][j] = rand() % 10 - 5;*/
 
 	k = fillIndexes(Ind, N);
 
@@ -135,8 +111,8 @@ int main()
 	x = (double *)calloc(sizeof(double), k + 1);
 	xNext = (double *)calloc(sizeof(double), k + 1);
 	x[1] = 1;
-	A = allocateMemory<double>(k + 1); 
-	
+	A = allocateMemory<double>(k + 1);
+
 
 	fillMatrix(A, Ind,N, h, F, step);
 	Solve(A, F, x, xNext, k);
@@ -144,10 +120,11 @@ int main()
 	
 
 	double max = normOfDiff(Result, PreciseSolution, Err, N);
-	cout << max;
-
-	print(Err, N, true, false, step);
-
+	//cout << max;
+	//print(Err, N, true, step);
+	print(Ind, N, false, step);
+	Eigenvalues E = Lusternik_init(A, N);
+	cout << "Maximum: " << E.max << endl << "Minimum: " << E.min << endl;
 	system("C:\\PROGRA~1\\gnuplot\\bin\\gnuplot.exe C:\\VP\\script.txt");
 	_getch();
 	return 0;

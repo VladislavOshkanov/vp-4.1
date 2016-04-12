@@ -37,7 +37,7 @@ void copy(double ** from, double ** to, int n) {
 }
 double norm(double * v, int n) {
 	double x = 0;
-	for (int i = 1; i < n; i++) {
+	for (int i = 1; i < n + 1; i++) {
 		x += v[i] * v[i];
 	}
 	x = sqrt(x);

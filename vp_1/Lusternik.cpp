@@ -1,10 +1,21 @@
 #include "stdafx.h"
 #include "Lusternik.h"
-#include"Service.h"
 
-double Lusternik_init(double ** A, int N) {
+#include <iostream>
 
-	return 0;
+Eigenvalues Lusternik_init(double ** A, int N) {
+	Eigenvalues E;
+	E.max = Lusternik(A, N);
+	double ** B;
+	B = allocateMemory<double>(N + 1);
+	for (int i = 1; i < N + 1; i++)
+		for (int j = 1; j < N + 1; j++) {
+			B[i][j] = -A[i][j];
+			if (i = j) B[i][j] += E.max;
+		}
+	E.min = E.max - Lusternik(B, N);
+
+	return E;
 }
 
 double Lusternik(double ** A, int N) {
@@ -13,26 +24,28 @@ double Lusternik(double ** A, int N) {
 	L = allocateMemory<double>(N + 1);
 	M = allocateMemory<double>(N + 1);
 	double * y, *result;
-	y = (double *)calloc(sizeof(double), 4);
-	result = (double *)calloc(sizeof(double), 4);
+	y = (double *)calloc(sizeof(double), N + 1);
+	result = (double *)calloc(sizeof(double), N + 1);
 	srand(time(NULL));
-	/*for (int i = 1; i < 4; i++)
-		for (int j = 1; j < 4; j++) {
-			K[i][j] = rand() % 10 - 5;
-			M[i][j] = K[i][j];
-			y[j] = rand() % 10 - 5;
-		}*/
-	for (int i = 1; i < 40; i++) {
-		mul(K, M, L, 5);
-		for (int j = 1; j < 5; j++)
-			for (int l = 1; l < 5; l++)
-				K[j][l] = L[j][l];
-	}
-	mul(K, y, result, 4);
-	double n1 = norm(result, 4);
-	mul(K, M, L, 4);
-	mul(L, y, result, 4);
-	double n2 = norm(result, 4);
+	for (int i = 1; i < N + 1; i++)
+			y[i] = rand() % 10 - 5;
+	copy(A, K, N);
+	copy(A, M, N);
+	double V, V_prev;
+	V = 1;
+	V_prev = 10;
+	while (fabs(V - V_prev) > epsilon *  N) {
+	//for (int q = 0; q < 10; q++){
+		mul(K, M, L, N + 1);
+		copy(L, K, N);
 
-	return 0;
+		mul(K, y, result, N + 1);
+		double n1 = norm(result, N);
+		mul(K, M, L, N + 1);
+		mul(L, y, result, N + 1);
+		double n2 = norm(result, N);
+		V_prev = V;
+		V = n2 / n1;
+	}
+	return V;
 }
