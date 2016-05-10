@@ -18,7 +18,8 @@ bool isBorder(int i, int j, int N) {   // if knot of net is on border of my area
 }
 
 double f(double x, double y) {
-	return (4 - 3.2 * x * x - 4.8 * y * y) / ((1 + x * x + y * y)*(1 + x * x + y * y)*(1 + x * x + y * y));
+	//return (4 - 3.2 * x * x - 4.8 * y * y) / ((1 + x * x + y * y)*(1 + x * x + y * y)*(1 + x * x + y * y));
+	return -0.9 * (-sin(x * y) * x * x + exp(y + x)) - 1.9 * (-sin(x * y) * y * y + exp(x + y));
 }
 
 
@@ -120,9 +121,9 @@ int main()
 	
 
 	double max = normOfDiff(Result, PreciseSolution, Err, N);
-	//cout << max;
-	//print(Err, N, true, step);
-	print(Ind, N, false, step);
+	
+	print(Err, N, true, step);
+	//print(Ind, N, false, step);
 	Eigenvalues E = Lusternik_init(A, N);
 	cout << "Maximum: " << E.max << endl << "Minimum: " << E.min << endl;
 	system("C:\\PROGRA~1\\gnuplot\\bin\\gnuplot.exe C:\\VP\\script.txt");
